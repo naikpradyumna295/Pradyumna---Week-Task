@@ -41,7 +41,7 @@ jobs:
 
       - name: Get instance IP
         id: get_instance_ip
-        run: echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+        run: echo "::set-output name=instance_ip::$(terraform output -raw instance_ip)"
 
   deploy:
     name: 'Deploy Strapi'
@@ -61,17 +61,17 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Debug IP
-        run: echo ${{ env.INSTANCE_IP }}
+        run: echo "${{ needs.terraform.outputs.instance_ip }}"
 
       - name: Copy Docker Compose file
         run: |
-          scp -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ./docker-compose.yml ubuntu@${{ env.INSTANCE_IP }}:/home/ubuntu/docker-compose.yml
+          scp -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ./docker-compose.yml ubuntu@${{ needs.terraform.outputs.instance_ip }}:/home/ubuntu/docker-compose.yml
 
       - name: Run Docker Compose
         run: |
-          ssh -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ubuntu@${{ env.INSTANCE_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ubuntu@${{ needs.terraform.outputs.instance_ip }} << EOF
           sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
           EOF
 
       - name: Verify Deployment
-        run: curl http://${{ env.INSTANCE_IP }}:1337
+        run: curl http://${{ needs.terraform.outputs.instance_ip }}:1337
