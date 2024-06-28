@@ -15,6 +15,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Verify AWS credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -26,9 +38,11 @@ jobs:
       - name: Plan Terraform
         id: plan
         run: terraform plan -out=plan.out
+        timeout-minutes: 10
 
       - name: Apply Terraform
         run: terraform apply -auto-approve plan.out
+        timeout-minutes: 15
 
       - name: Get instance IP
         id: get_instance_ip
@@ -50,6 +64,9 @@ jobs:
 
       - name: Install Dependencies
         run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Debug IP
+        run: echo ${{ env.INSTANCE_IP }}
 
       - name: Copy Docker Compose file
         run: |
