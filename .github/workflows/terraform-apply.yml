@@ -41,4 +41,4 @@ jobs:
 
       - name: Get instance IP
         id: get_instance_ip
-        run: echo "::set-output name=instance_ip::$(terraform output -raw instance_ip)"
+        run: echo "instance_ip=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
