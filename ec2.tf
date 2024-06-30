@@ -40,16 +40,18 @@ resource "aws_instance" "strapi_instance" {
       "sudo usermod -aG docker ubuntu",
       "sudo curl -L 'https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)' -o /usr/local/bin/docker-compose",
       "sudo chmod +x /usr/local/bin/docker-compose",
-      "cat <<EOT >> /home/ubuntu/docker-compose.yml
-version: '3'
-services:
-  strapi:
-    image: strapi/strapi
-    ports:
-      - '1337:1337'
-    volumes:
-      - ./app:/srv/app
-EOT",
+      <<-EOF
+      cat <<EOT >> /home/ubuntu/docker-compose.yml
+      version: '3'
+      services:
+        strapi:
+          image: strapi/strapi
+          ports:
+            - "1337:1337"
+          volumes:
+            - ./app:/srv/app
+      EOT
+      EOF,
       "sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d"
     ]
   }
