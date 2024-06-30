@@ -25,19 +25,16 @@ jobs:
 
       - name: Fetch Terraform Outputs
         id: fetch_outputs
-        run: |
-          echo "INSTANCE_IP=$(terraform output -raw instance_ip)" >> $GITHUB_ENV
+        run: echo "INSTANCE_IP=${{ github.event.workflow_run.outputs.instance_ip }}" >> $GITHUB_ENV
 
       - name: Debug IP
         run: echo "Instance IP: ${{ env.INSTANCE_IP }}"
 
       - name: Check SSH connection
-        run: |
-          ssh -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ubuntu@${{ env.INSTANCE_IP }} echo "SSH connection successful"
+        run: ssh -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ubuntu@${{ env.INSTANCE_IP }} echo "SSH connection successful"
 
       - name: Copy Docker Compose file
-        run: |
-          scp -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ./docker-compose.yml ubuntu@${{ env.INSTANCE_IP }}:/home/ubuntu/docker-compose.yml
+        run: scp -o StrictHostKeyChecking=no -i /mnt/data/Intern.pem ./docker-compose.yml ubuntu@${{ env.INSTANCE_IP }}:/home/ubuntu/docker-compose.yml
 
       - name: Run Docker Compose
         run: |
